@@ -1,0 +1,52 @@
+# Project Rules — .project-rules
+
+## Tech Stack
+- Framework: Next.js 16 / React 19 / Node 22
+- Language: TypeScript (strict)
+- Styling: Tailwind CSS 4 + shadcn/ui
+- Database: Drizzle ORM + MySQL
+- API: tRPC + Express
+- Auth: OAuth2 + JWT (HttpOnly cookies)
+- State: TanStack Query (server) + Zustand (client)
+- Testing: Vitest + Playwright
+- Deploy: Vercel + GitHub Actions
+
+## Coding Standards
+- File naming: kebab-case for routes, PascalCase for components
+- Import order: React → External → Internal → Local (enforced by eslint)
+- Export style: Named exports preferred over default
+- Error handling: TRPCError or HTTP error codes with descriptive messages
+- Comments: NONE by default — only add when why cannot be conveyed through naming/structure
+
+## Architecture Conventions
+- Feature-Sliced Design: app/ → processes/ → features/ → entities/ → shared/
+- Colocation: Co-locate related files together in route segments
+- Private folders: Prefix non-routable folders with `_` (e.g., `_components`, `_lib`)
+- Route groups: Use `(group)` naming for layout partitioning without URL impact
+- Server Components: By default everything is Server Component, `'use client'` ONLY at leaf level
+- Data fetching: `async/await` directly in Server Components, no useEffect pattern needed
+- State Management split: TanStack Query for server state, Zustand for client global, URL params for routing state
+- NEVER mix server state and client state — causes double-fetching and stale cache
+
+## Testing Requirements
+- Unit tests: Vitest for pure functions, hooks, utils — ~80%+ coverage
+- Integration tests: Vitest for tRPC routers, DB queries with test database
+- E2E tests: Playwright for critical user journeys only (5-10% of total tests)
+- Never chase 100% coverage — it's a quality indicator not a goal
+- Follow Kent C. Dodds principles: test behavior, not implementation details
+
+## Git Workflow
+- Branch strategy: Trunk-Based Development (short-lived feature branches <24h turnaround)
+- Commit format: Conventional Commits (`feat(auth): add OAuth flow`, `fix(api): resolve race condition`)
+- PR process: Draft PR → CI checks pass → Review → Approve → Merge → Auto-delete branch
+- Always run `pnpm build && pnpm test` before pushing to main
+
+## Security Checklist
+- Never hardcode secrets (use `.env` files excluded from version control)
+- Validate all user input with Zod schemas before processing
+- Rate limit auth endpoints (`express-rate-limit` middleware)
+- Use HttpOnly cookies for JWT tokens (not localStorage)
+- Enforce CSP headers via Helmet.js
+- CORS restricted to explicit origins only (never `*` in production)
+- Parameterized SQL queries exclusively (Drizzle handles this automatically)
+- HTTPS enforced in production
